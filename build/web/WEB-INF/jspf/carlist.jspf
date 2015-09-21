@@ -1,0 +1,129 @@
+<%-- any content can be specified here e.g.: --%>
+<%@ page pageEncoding="UTF-8" %>
+<%@page import="beans.CarList"%>
+<%@page import="java.util.ArrayList"%>
+<%@page import="beans.Car"%>
+
+<%
+
+    String actionWithCar = "";
+    int Idclients = 0;
+
+    int idcars = 0;
+
+    try {
+        actionWithCar = request.getParameter("actionWithCar").toString();
+
+    } catch (Exception ex) {
+        ex.printStackTrace();
+    }
+    try {
+        idcars = Integer.valueOf(request.getParameter("idcars").toString());
+    } catch (Exception ex) {
+        ex.printStackTrace();
+    }
+
+    try {
+        Idclients = Integer.valueOf(request.getAttribute("clientCurrentId").toString());
+    } catch (Exception ex) {
+        ex.printStackTrace();
+    }
+
+    if (actionWithCar.equals("delete")) {
+        if (idcars != 0) {
+            Car.deleteCardb(idcars);
+            idcars = 0;
+            actionWithCar = "";
+        }
+    }
+    if (actionWithCar.equals("save")) {
+        if (idcars != 0) {
+            Car.updateCardb(idcars,
+                    request.getParameter("Make"),
+                    request.getParameter("Model"),
+                    Integer.valueOf(request.getParameter("Year").toString()),
+                    request.getParameter("VIN"));
+        } else {
+            Car.addCardb(request.getParameter("Make"),
+                    request.getParameter("Model"),
+                    Integer.valueOf(request.getParameter("Year").toString()),
+                    request.getParameter("VIN"),
+                    Idclients);
+        }
+    }
+%>
+
+<div>
+    <form method="POST" onsubmit="return empty_form_car ()">
+        <br>
+        <table style="border-color: #cccccc" border="5" cellspacing="5" cellpadding="5">
+            <tr>        
+
+            <td><input type="hidden" name="actionid" value="Clients" />                     
+            <input type="hidden" name="clientId" value="<%=Idclients%>" /> </td>     
+            <td><input type="submit" value="add" name="actionWithCar" /></td> 
+            <td><input type="submit" value="edit" name="actionWithCar" /> </td>
+            <td><input type="submit" value="save" name="actionWithCar" /></td>
+            <td><input type="submit" value="delete" name="actionWithCar" /> </td>
+
+            </tr>
+            <tr>
+                <td></td>
+                <td>Make</td>
+                <td>Model</td>
+                <td>Year</td>
+                <td>VIN</td>
+                <td></td>
+            </tr>
+            <%
+
+                if (actionWithCar.equals("add")) {
+            %>
+            <tr>
+                <td></td>
+                <td><input id="Make" type="text" name="Make" value="" size = "10" /></td>
+                <td><input id="Model" type="text" name="Model" value="" size = "10" /></td>
+                <td><input id="Year" type="number" name="Year" value="" size = "10" /></td>
+                <td><input id="VIN" type="text" name="VIN" value="" size = "10" /></td>
+            </tr>
+            <%
+                }
+
+                CarList carList = new CarList();
+                ArrayList<Car> list_car = new ArrayList<Car>();
+                list_car = carList.getClientListSearchById(Idclients);
+                for (Car car : list_car) {
+
+                    if ((actionWithCar.equals("")) || (actionWithCar.equals("save")) || (((actionWithCar.equals("edit")) && (car.getIdcars() != idcars)))) {
+            %>
+
+            <tr>
+                <td><input type="checkbox" name="idcars" value="<%=car.getIdcars()%>"/></td>
+                <td><%=car.getMake()%></td>
+                <td><%=car.getModel()%></td>
+                <td><%=car.getYear()%></td>
+                <td><%=car.getVIN()%></td>
+                <td><a href="index.jsp?actionid=Orders&carmake=<%=car.getMake()%>&idcars=<%=car.getIdcars()%>">view orders >></a></td>
+            </tr>
+            <%
+                }
+
+                if ((actionWithCar.equals("edit")) && (car.getIdcars() == idcars)) {
+            %>
+
+            <tr>
+                <td><input type="hidden" name="idcars" checked="true" value="<%=car.getIdcars()%>"/></td>
+                <td><input id="Make" type="text" name="Make" value="<%=car.getMake()%>" size = "10" /></td>
+                <td><input id="Model" type="text" name="Model" value="<%=car.getModel()%>" size = "10" /></td>
+                <td><input id="Year" type="number" name="Year" value="<%=car.getYear()%>" size = "10" /></td>
+                <td><input id="VIN" type="text" name="VIN" value="<%=car.getVIN()%>" size = "10" /></td>            
+            </tr>
+            <%
+                    }
+
+                }
+            %>
+
+        </table>
+    </form>
+</div>

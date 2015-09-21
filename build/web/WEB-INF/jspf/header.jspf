@@ -1,0 +1,25 @@
+<%@ page pageEncoding="UTF-8" %>
+<html>
+    <html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Clients database</title>
+        <link href="css/style_main.css" rel="stylesheet" type="text/css">
+        <script type="text/javascript" src="js/javascript.js"></script>
+    </head>
+    <body>
+
+        <div class="container">
+            <div class="header">                
+                <div class="descr">
+                    <h3>Clients</h3>
+                </div>
+                <div class="search_form">
+                    <form name="search_form" method="POST">
+                        First Name: <input type="text" name="FirstName" value="${param.FirstName}" size="40" />
+                        Last Name: <input type="text" name="LastName" value="${param.LastName}" size="40" />
+                        <input type="hidden" name="actionid" value="Clients" />                        
+                        <input class="search_button" type="submit" value="Search" name="search_button" />                        
+                    </form>
+                </div>
+            </div>

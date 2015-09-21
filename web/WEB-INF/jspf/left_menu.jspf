@@ -1,0 +1,11 @@
+
+<%@ page pageEncoding="UTF-8" %>
+<div class="sidebar1">
+    <h4>Lists:</h4>
+    <ul class="nav">
+        
+        <li><a href="index.jsp?actionid=Clients">Clients>></a></li>
+        <li><a href="index.jsp?actionid=Orders">Orders>></a></li>   
+        
+    </ul>
+</div>

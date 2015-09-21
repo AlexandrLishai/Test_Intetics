@@ -1,0 +1,200 @@
+<%-- any content can be specified here e.g.: --%>
+
+
+<%@page import="java.sql.Date"%>
+<%@page import="beans.ClientList"%>
+<%@page import="java.util.ArrayList"%>
+<%@page import="beans.Client"%>
+
+<%@ page pageEncoding="UTF-8" %>
+<%request.setCharacterEncoding("UTF-8");
+
+    String actionid = "";
+    String actionWithClient = "";
+
+    try {
+        actionid = request.getParameter("actionid").toString();
+        actionWithClient = request.getParameter("actionWithClient").toString();
+    } catch (Exception ex) {
+        ex.printStackTrace();
+    }
+
+%>
+
+
+<div class="client_list">
+    <h3>${param.actionid}</h3>    
+
+    <%        if (actionid.equals("Clients")) {
+
+            String firstName = "";
+            String lastName = "";
+            int clientId = 0;
+            int clientCurrentId = 0;
+            boolean findClient = false;
+            ArrayList<Client> list = new ArrayList<Client>();
+            try {
+                firstName = request.getParameter("FirstName").toString();
+                lastName = request.getParameter("LastName").toString();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            try {
+                clientId = Integer.valueOf(request.getParameter("clientId").toString());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+            if (actionWithClient.equals("save")) {
+                if (clientId != 0) {
+                    Client.updateClientdb(clientId, firstName, lastName,
+                            Date.valueOf(request.getParameter("DateofBirth")), request.getParameter("Address"),
+                            request.getParameter("Phone"), request.getParameter("Email"));
+                } else {
+                    Client.addClientdb(firstName, lastName,
+                            Date.valueOf(request.getParameter("DateofBirth")), request.getParameter("Address"),
+                            request.getParameter("Phone"), request.getParameter("Email"));
+                }
+            };
+
+            if (actionWithClient.equals("delete")) {
+                if (clientId != 0) {
+                    Client.deleteClientdb(clientId);
+                    clientId = 0;
+                    actionWithClient = "";
+                }
+            };
+
+            if (actionWithClient.equals("")) {
+                        // not found client
+    %>
+    <div class="client_info_1">
+        <form method="POST">                            
+            <input type="hidden" name="actionWithClient" value="add" />        
+            <input type="submit" value="ADD" name="add_button" /> 
+            <input type="hidden" name="actionid" value="Clients" />
+        </form> 
+    </div>
+    
+    <%
+        }
+
+        ClientList clientList = new ClientList();
+        list = clientList.getClientList();
+        if ((!firstName.equals("")) && (!lastName.equals(""))) {
+            list = clientList.getClientListSearch(firstName, lastName);
+            
+        } // end if
+        if (clientId != 0) {
+            list = clientList.getClientListSearchById(clientId);
+            
+        } // end if
+        for (Client client : list) {
+            findClient = true;
+            clientCurrentId = client.getIdclients();
+            request.setAttribute("clientCurrentId", clientCurrentId);
+            if ((actionWithClient.equals("")) || (actionWithClient.equals("save"))) {
+
+    %>
+
+    <div class="client_info">
+        <div class="client_title">
+            <p> <%=client.getFirstName()%>  <%=client.getLastName()%></p>
+        </div>
+        <div class="client_details">            
+            <form method="POST" style="float: left;">
+                <input type="hidden" name="clientId" value="<%=client.getIdclients()%>" />
+                <input type="hidden" name="actionWithClient" value="edit" />                
+                <input type="hidden" name="actionid" value="Clients" />
+                <input type="submit" value="EDIT" name="edit_button" />                        
+            </form>
+            <form method="POST" style="float: left;">
+                <input type="hidden" name="clientId" value="<%=client.getIdclients()%>" />
+                <input type="hidden" name="actionWithClient" value="delete" size="20" />
+                <input type="hidden" name="actionid" value="Clients" />
+                <input type="submit" value="DELETE" name="delete_button" />                        
+            </form>
+            <br>
+            <div>
+                <br><strong>First Name</strong> <%=client.getFirstName()%>
+                <br><strong>Last Name</strong> <%=client.getLastName()%>
+
+                <br><strong>Date of Birth</strong> <%=client.getDateofBirth()%>
+                <br><strong>Phone</strong> <%=client.getPhone()%>
+                <br><strong>Address</strong> <%=client.getAddress()%>
+                <br><strong>Email</strong> <%=client.getEmail()%>
+            </div>
+        </div>
+        <%@include file="carlist.jspf" %>
+    </div>
+
+
+
+
+    <%              }; // end if actionWithClient = ""
+        if (actionWithClient.equals("edit")) {
+    %>
+
+    <div class="client_info">
+        <div class="client_title">
+            <p> <%=client.getFirstName()%>  <%=client.getLastName()%></p>
+        </div>
+        <div class="client_details">            
+            <form method="POST" style="float: left;" onsubmit="return empty_form_client()">
+                <input type="hidden" name="clientId" value="<%=client.getIdclients()%>" />
+                <input type="hidden" name="actionWithClient" value="save" />  
+                <input type="hidden" name="actionid" value="Clients" />
+                <input type="submit" value="SAVE" name="save_button"  /> 
+        
+                <div class="client_details">
+                    <br><strong>First Name</strong> <input id="FirstName" type="text" name="FirstName" value="<%=client.getFirstName()%>" size = "20" />
+                    <br><strong>Last Name</strong> <input id="LastName" type="text" name="LastName" value="<%=client.getLastName()%>" size = "20" />
+                    <br><strong>Date of Birth</strong> <input id="DateofBirth" type="date" name="DateofBirth" value="<%=client.getDateofBirth()%>" size = "20" />
+                    <br><strong>Phone</strong> <input id="Phone" type="text" name="Phone" value="<%=client.getPhone()%>" size = "20" />
+                    <br><strong>Address</strong> <input id="Address" type="text" name="Address" value="<%=client.getAddress()%>" size = "20" />
+                    <br><strong>Email</strong> <input id="Email" type="text" name="Email" value="<%=client.getEmail()%>" size = "20" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <%
+            }
+        } // end for
+        if (actionWithClient.equals("add")) {
+    %>
+
+    <div class="client_info">
+        <div class="client_title">
+            <p> Enter information about new client</p>
+        </div>
+        <p></p>
+        <div class="client_details">            
+            <form method="POST" style="float: left;" onsubmit="return empty_form_client()">
+                <input type="hidden" name="actionWithClient" value="save" />  
+                <input type="hidden" name="actionid" value="Clients" />
+                <input type="submit" value="SAVE" name="save_button" /> 
+
+                <div class="client_details">
+                    <br><strong>First Name</strong> <input id="FirstName" type="text" name="FirstName" value="" size = "20" />
+                    <br><strong>Last Name</strong> <input id="LastName" type="text" name="LastName" value="" size = "20" />
+                    <br><strong>Date of Birth</strong> <input id="DateofBirth" type="date" name="DateofBirth" value="" size = "20" />
+                    <br><strong>Phone</strong> <input id="Phone" type="text" name="Phone" value="" size = "20" />
+                    <br><strong>Address</strong> <input id="Address" type="text" name="Address" value="" size = "20" />
+                    <br><strong>Email</strong> <input id="Email" type="text" name="Email" value="" size = "20" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <%
+            }
+        } // end if Clients
+        if (actionid.equals("Orders")) {
+    %>
+
+    <%@include file="orders.jspf" %>
+
+    <%                }
+    %>
+</div>

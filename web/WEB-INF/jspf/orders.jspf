@@ -1,0 +1,175 @@
+<%-- any content can be specified here e.g.: --%>
+<%@page import="java.sql.Date"%>
+<%@page import="beans.Order"%>
+<%@page import="beans.OrderList"%>
+<%@page import="java.util.ArrayList"%>
+<%@ page pageEncoding="UTF-8" %>
+
+<%
+
+    String actionWithOrder = "";
+    int car_id = 0;
+    int order_id = 0;
+
+    try {
+        actionWithOrder = request.getParameter("actionWithOrder").toString();
+    } catch (Exception ex) {
+        ex.printStackTrace();
+    }
+
+    try {
+        car_id = Integer.valueOf(request.getParameter("idcars").toString());
+    } catch (Exception ex) {
+        ex.printStackTrace();
+    }
+
+    try {
+        order_id = Integer.valueOf(request.getParameter("order_id").toString());
+    } catch (Exception ex) {
+        ex.printStackTrace();
+    }
+
+    if (actionWithOrder.equals("delete")) {
+        if (order_id != 0) {
+            Order.deleteOrderdb(order_id);
+            order_id = 0;
+            actionWithOrder = "";
+        }
+    }
+    if (actionWithOrder.equals("save")) {
+        if (order_id != 0) {
+            Order.updateOrderdb(order_id,
+                    Date.valueOf(request.getParameter("Date")),
+                    Integer.valueOf(request.getParameter("OrderAmount").toString()),
+                    Integer.valueOf(request.getParameter("OrderStatus_id").toString()),
+                    request.getParameter("OrderStatus_name").toString(),
+                    car_id,
+                    request.getParameter("carmake").toString());
+        } else {
+            Order.addOrderdb(Date.valueOf(request.getParameter("Date")),
+                    Integer.valueOf(request.getParameter("OrderAmount").toString()),
+                    Integer.valueOf(request.getParameter("OrderStatus_id").toString()),
+                    car_id);
+        }
+    }
+
+    OrderList orderList = new OrderList();
+    ArrayList<Order> list_order = new ArrayList<Order>();
+    list_order = orderList.getOrderList();
+
+    String carMake = "";
+
+    if (car_id != 0) {
+        list_order = orderList.getOrderListSearchByCarId(car_id);
+        carMake = "Orders by Car  : " + request.getParameter("carmake").toString();
+        
+    } // end if
+    else
+    {
+        carMake = "<a href=index.jsp?actionid=Clients>Edit information about orger go to Clients>></a>"; 
+    }
+
+%>
+
+
+<div class="book_list">
+    <h3><%=carMake%></h3>    
+    <form method="POST" onsubmit="return empty_form_order()">
+        <br>
+        <table style="border-color: cccccc" border="5" cellspacing="5" cellpadding="5">
+            <tr>
+
+                <%
+                    if (car_id != 0) {
+                %>
+            <input type="hidden" name="actionid" value="Orders" />
+            <input type="hidden" name="car_id" value="<%=car_id%>" />            
+            <input type="submit" value="add" name="actionWithOrder" /> 
+            <input type="submit" value="edit" name="actionWithOrder" /> 
+            <input type="submit" value="save" name="actionWithOrder" />
+            <input type="submit" value="delete" name="actionWithOrder" />
+
+            <%
+                }
+            %>
+
+            </tr>
+            <tr>
+                <td></td>
+                <td>Date</td>
+                <td>Order Amount</td>
+                <td>Status</td>
+                <td>Car</td>
+            </tr>
+            <%
+                if (actionWithOrder.equals("add")) {
+            %>
+
+            <tr>
+                <td></td>
+                <td><input id="Date" type="date" name="Date" value="" size = "10" /></td>
+                <td><input id="OrderAmount" type="number" name="OrderAmount" value="" size = "10" /></td>
+                <td><select name="OrderStatus_id">
+                        <option value="1">Completed</option>
+                        <option value="2">In Progress</option>
+                        <option value="3">Cancelled</option>
+                    </select></td>
+                <td>${param.carmake}</td>
+
+            </tr>
+
+            <%
+                }
+                for (Order order : list_order) {
+
+                    if ((actionWithOrder.equals("")) || (actionWithOrder.equals("save")) || ((actionWithOrder.equals("edit")) && (order.getIdorders() != order_id))) {
+
+            %>
+
+            <tr>
+                <%        if (car_id != 0) {
+                %>
+                <td><input type="checkbox" name="order_id" value="<%=order.getIdorders()%>"/></td>
+                    <%
+                    } else {
+                    %>
+                <td></td>
+                <%
+                    }
+                %>
+                <td><%=order.getDate()%></td>
+                <td><%=order.getOrderAmount()%></td>
+                <td><%=order.getOrderStatus_name()%></td>
+                <td><%=order.getCar_make()%></td>                
+            </tr>
+
+            <%
+                }
+
+                if ((actionWithOrder.equals("edit")) && (order.getIdorders() == order_id)) {
+            %>
+
+            <tr>
+                <td><input type="hidden" name="order_id" value="<%=order.getIdorders()%>"/></td>
+                <td><input id="Date" type="date" name="Date" value="<%=order.getDate()%>" size = "10" /></td>
+                <td><input id="OrderAmount" type="number" name="OrderAmount" value="<%=order.getOrderAmount()%>" size = "10" /></td>
+                <td><select name="OrderStatus_id">
+                        <option value="1" <% if (order.getOrderStatus_id() == 1) { %> selected <%}%> >Completed</option>
+                        <option value="2" <% if (order.getOrderStatus_id() == 2) { %> selected <%}%> >In Progress</option>
+                        <option value="3" <% if (order.getOrderStatus_id() == 3) { %> selected <%}%> >Cancelled</option>
+                    </select>
+                </td>
+                <td><%=order.getCar_make()%></td>
+
+            </tr>
+
+            <%
+                    }
+
+                }
+
+            %>
+
+        </table>
+    </form>
+</div>
